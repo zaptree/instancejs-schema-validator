@@ -1,0 +1,29 @@
+{
+  "name": "schema-validator",
+  "version": "0.1.0",
+  "description": "schema validation",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaptree/schema-validator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zaptree/schema-validator/issues"
+  },
+  "homepage": "https://github.com/zaptree/schema-validator#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-shallow-deep-equal": "^1.4.0",
+    "gulp": "^3.9.0",
+    "gulp-istanbul": "^0.10.0",
+    "gulp-mocha": "^2.1.3"
+  },
+  "dependencies": {
+    "lodash": "^4.12.0"
+  }
+}
