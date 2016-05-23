@@ -10,12 +10,12 @@ var assert = require('chai').assert;
 
 chai.use(require('chai-shallow-deep-equal'));
 
-describe('validator', function(){
+describe('validator', function () {
 
 	var schema,
 		data;
 
-	beforeEach(function(){
+	beforeEach(function () {
 		schema = {
 			mode: 'filter', // strict || loose || filter(default) for strict I should just get the keys on each iteration and throw error if it fails, no need to continue validation
 			cast: false,	// if true will auto-cast to proper type
@@ -32,31 +32,28 @@ describe('validator', function(){
 				//},
 				// types: string, integer(int), number(float), boolean(bool), object
 				name: {
-					type: 'string',
-					array: false
+					type: 'string'
 				},
 				age: {
-					type: 'integer',
-					array: false
+					type: 'integer'
 				},
 				wins: {
-					type: 'int',
-					array: false
+					type: 'int'
 				},
 				rating: {
 					type: 'number'
 				},
 				money: {
-					type: 'float',
-					array: false
+					type: 'float'
 				},
 				active: {
-					type: 'boolean',
-					array: false
+					type: 'boolean'
 				},
 				skills: {
-					type: 'string',
-					array: true
+					type: 'array',
+					schema: {
+						type: 'string'
+					}
 				},
 				email: {
 					type: 'string',
@@ -64,27 +61,28 @@ describe('validator', function(){
 					// default: 'proxy@schema-validator-js.com'
 				},
 				addresses: {
-					array: true,
-					type: 'object',
-					properties: {
-						street: {
-							type: 'string'
-						},
-						zip: {
-							type: 'integer'
+					type: 'array',
+					schema: {
+						type: 'object',
+						properties: {
+							street: {
+								type: 'string'
+							},
+							zip: {
+								type: 'integer'
+							}
 						}
 					}
+
 				},
 				specials: {
 					type: 'object',
 					properties: {
 						curve: {
-							type: 'int',
-							array: false
+							type: 'int'
 						},
 						nickname: {
-							type: 'string',
-							array: false
+							type: 'string'
 						}
 					}
 				}
@@ -124,7 +122,7 @@ describe('validator', function(){
 	// todo: objects
 	// todo: add mixed values
 
-	it('should validate my data', function(){
+	it('should validate my data', function () {
 		var validator = new Validator(schema);
 		var result = validator.validate(data);
 		assert(result.success);
@@ -133,8 +131,7 @@ describe('validator', function(){
 	});
 
 
-
-	it('should fail validation when passing in the wrong type', function(){
+	it('should fail validation when passing in the wrong type', function () {
 		data = {
 			name: 123,
 			wins: 'many',
@@ -157,7 +154,7 @@ describe('validator', function(){
 		assert.deepEqual(result.data, data);
 	});
 
-	it('should fail validation for properties in an object', function(){
+	it('should fail validation for properties in an object', function () {
 		data = {
 			specials: {
 				curve: 'wrong',
@@ -174,7 +171,7 @@ describe('validator', function(){
 		assert.deepEqual(result.data, data);
 	});
 
-	it('should fail validation for items in an array', function(){
+	it('should fail validation for items in an array', function () {
 		data = {
 			skills: [
 				1,
@@ -192,7 +189,7 @@ describe('validator', function(){
 		assert.deepEqual(result.data, data);
 	});
 
-	it('should fail validation for properties in an object in an array', function(){
+	it('should fail validation for properties in an object in an array', function () {
 		data = {
 			addresses: [
 				{
@@ -211,7 +208,7 @@ describe('validator', function(){
 		assert.deepEqual(result.data, data);
 	});
 
-	it('should use the default value when value is missing', function(){
+	it('should use the default value when value is missing', function () {
 		schema.properties.email.default = 'test@email.com';
 		schema.properties.skills.default = ['shooting'];
 		var validator = new Validator(schema);
@@ -220,21 +217,21 @@ describe('validator', function(){
 		assert.equal(result.data.skills, schema.properties.skills.default);
 	});
 
-	it('should throw an error with orphan data and strict mode', function(){
+	it('should throw an error with orphan data and strict mode', function () {
 		schema.mode = 'strict';
 
 		data = _.assign(data, {
 			extra1: 'this should not be here'
 		});
 		var validator = new Validator(schema);
-		var run = function(){
+		var run = function () {
 			validator.validate(data);
 		};
 		assert.throws(run, 'Properties not in schema are not allowed in strict mode:');
 
 	});
 
-	it('should keep orphan properties when in loose mode', function(){
+	it('should keep orphan properties when in loose mode', function () {
 		schema.mode = 'loose';
 		var extraProperties = {
 			extra1: 'this should not be here',
@@ -248,7 +245,7 @@ describe('validator', function(){
 
 	});
 
-	it('should filter out data that is not part of the schema when not using loose mode', function(){
+	it('should filter out data that is not part of the schema when not using loose mode', function () {
 		var extendedData = _.assign({}, data, {
 			extra1: 'this should not be here',
 			extra2: 'this should not be here'
