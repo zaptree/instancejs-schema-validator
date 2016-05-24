@@ -255,5 +255,109 @@ describe('validator', function () {
 		assert.deepEqual(result.data, data);
 	});
 
+	describe('validation', function(){
+		it.only('should compile validation rules when creating a schema', function(){
+			schema = {
+				properties: {
+					email: {
+						type: 'string',
+						validation: 'email'
+					},
+					phone: {
+						type: 'string',
+						validation: 'phoneUS|required[email="no"]|equals[phone2]'
+					},
+					combined: {
+						type: 'string',
+						validation: 'combined[param=hello,param2=,world]'
+					}
+				}
+			};
+			var expected = {
+				properties: {
+					email: {
+						type: 'string',
+						validation: [
+							{
+								type: 'email',
+								arguments: []
+							}
+						]
+					},
+					phone: {
+						type: 'string',
+						validation: [
+							{
+								type: 'phoneUS',
+								arguments: []
+							},
+							{
+								type: 'required',
+								arguments: [
+									{
+										key: 'email',
+										value: 'no'
+									}
+								]
+							},
+							{
+								type: 'equals',
+								arguments: [
+									'phone2'
+								]
+							},
+						]
+					},
+					combined: {
+						type: 'string',
+						validation: [
+							{
+								type: 'combined',
+								arguments: [
+									{
+										key: 'param',
+										value: 'hello'
+									},
+									{
+										key: 'param2',
+										value: ''
+									},
+									'world'
+								]
+							}
+						]
+					}
+				}
+			};
+			var validator = new Validator(schema);
+			assert.deepEqual(validator.schema, expected);
+		});
+
+		it('should validate email fields', function(){
+			schema = {
+				properties: {
+					email: {
+						type: 'string',
+						validation: 'email'
+					},
+					emailBad: {
+						type: 'string',
+						validation: 'email'
+					}
+				}
+			};
+			data = {
+				email: 'nick@schema-validator.com',
+				emailBad: 'nick@'
+			};
+			var validator = new Validator(schema);
+			var result = validator.validate(data);
+
+			assert.isFalse(result.success, 'it should fail success');
+			assert.isObject(result.errors, 'it should have errors');
+			assert(!result.errors.email, 'email should validate email');
+			assert(result.errors.emailBad, 'email should fail to validate emailBad');
+		});
+	});
 
 });
