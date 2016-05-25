@@ -214,7 +214,7 @@ describe('validator', function () {
 		var validator = new Validator(schema);
 		var result = validator.validate({});
 		assert.equal(result.data.email, schema.properties.email.default);
-		assert.equal(result.data.skills, schema.properties.skills.default);
+		assert.deepEqual(result.data.skills, schema.properties.skills.default);
 	});
 
 	it('should throw an error with orphan data and strict mode', function () {
@@ -256,9 +256,16 @@ describe('validator', function () {
 	});
 
 	describe('validation', function(){
-		it.only('should compile validation rules when creating a schema', function(){
+		it('should compile validation rules when creating a schema', function(){
 			schema = {
 				properties: {
+					items: {
+						type: 'array',
+						schema: {
+							type: 'string',
+							validation: 'phoneGB'
+						}
+					},
 					email: {
 						type: 'string',
 						validation: 'email'
@@ -275,6 +282,18 @@ describe('validator', function () {
 			};
 			var expected = {
 				properties: {
+					items: {
+						type: 'array',
+						schema: {
+							type: 'string',
+							validation: [
+								{
+									type:'phoneGB',
+									arguments: []
+								}
+							]
+						}
+					},
 					email: {
 						type: 'string',
 						validation: [
@@ -305,7 +324,7 @@ describe('validator', function () {
 								arguments: [
 									'phone2'
 								]
-							},
+							}
 						]
 					},
 					combined: {
@@ -333,7 +352,7 @@ describe('validator', function () {
 			assert.deepEqual(validator.schema, expected);
 		});
 
-		it('should validate email fields', function(){
+		it.only('should validate email fields', function(){
 			schema = {
 				properties: {
 					email: {
