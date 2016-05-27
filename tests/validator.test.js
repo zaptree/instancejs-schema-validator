@@ -20,17 +20,6 @@ describe('validator', function () {
 			mode: 'filter', // strict || loose || filter(default) for strict I should just get the keys on each iteration and throw error if it fails, no need to continue validation
 			cast: false,	// if true will auto-cast to proper type
 			properties: {
-				//this is the alterante array schema that would not limit you from having array of arrays
-				//items: {
-				//	type: 'array',
-				//	schema: {
-				//		type: 'array',
-				//		schema: {
-				//			type: 'string'
-				//		}
-				//	}
-				//},
-				// types: string, integer(int), number(float), boolean(bool), object
 				name: {
 					type: 'string'
 				},
@@ -114,12 +103,12 @@ describe('validator', function () {
 
 	// todo: I need to implement/test:
 	// todo: casting
-	// todo: type validation
-	// todo: validation
+	// done: type validation
+	// done: validation
 	// todo: extending types
 	// todo: extending validation
-	// todo: arrays
-	// todo: objects
+	// done: arrays
+	// done: objects
 	// todo: add mixed values
 
 	it('should validate my data', function () {
@@ -255,6 +244,56 @@ describe('validator', function () {
 		assert.deepEqual(result.data, data);
 	});
 
+	describe('casting', function(){
+		it.only('should cast numbers properly', function(){
+			schema = {
+				cast: true,
+				properties: {
+					age: {
+						type: 'number'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: '14',
+					expected: 14
+				},
+				{
+					value: true,
+					expected: 1
+				},
+				{
+					value: false,
+					expected: 0
+				},
+				{
+					value: 'hello',
+					error: true
+				},
+				{
+					value: NaN,	// this get's converted to null when doing stringify/parse
+					expected: 0
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					age: testCase.value
+				});
+				if(testCase.error){
+					assert(!result.success);
+					assert.equal(result.errors.age.id, 'VALIDATION_ERROR_NOT_NUMBER');
+				}else{
+					assert(result.success);
+					assert.equal(result.data.age, testCase.expected);
+				}
+			});
+
+		});
+	});
+
 	describe('validation', function(){
 		it('should compile validation rules when creating a schema', function(){
 			schema = {
@@ -352,7 +391,7 @@ describe('validator', function () {
 			assert.deepEqual(validator.schema, expected);
 		});
 
-		it.only('should validate email fields', function(){
+		it('should validate email fields', function(){
 			schema = {
 				properties: {
 					email: {
@@ -375,7 +414,34 @@ describe('validator', function () {
 			assert.isFalse(result.success, 'it should fail success');
 			assert.isObject(result.errors, 'it should have errors');
 			assert(!result.errors.email, 'email should validate email');
-			assert(result.errors.emailBad, 'email should fail to validate emailBad');
+			assert.equal(result.errors.emailBad.id, 'VALIDATION_FAILED_EMAIL', 'email should fail to validate emailBad');
+		});
+
+		it('should validate betweenNumber', function(){
+			schema = {
+				properties: {
+					percent: {
+						type: 'number',
+						validation: 'betweenNumber[0,100]'
+					},
+					percentBad: {
+						type: 'number',
+						validation: 'betweenNumber[0,100]'
+					}
+				}
+			};
+			data = {
+				percent: 34,
+				percentBad: 234
+			};
+			var validator = new Validator(schema);
+			var result = validator.validate(data);
+
+			assert.isFalse(result.success, 'it should fail success');
+			assert.isObject(result.errors, 'it should have errors');
+			assert(!result.errors.percent, 'betweenNumber should validate percent');
+			assert.equal(result.errors.percentBad.id, 'VALIDATION_FAILED_BETWEEN_NUMBER', 'betweenNumber should fail to validate percentBad');
+			assert.equal(result.errors.percentBad.value, 'Value should be between 0 and 100', 'argument values should replace placeholders');
 		});
 	});
 
