@@ -119,7 +119,6 @@ describe('validator', function () {
 		assert.deepEqual(data, result.data);
 	});
 
-
 	it('should fail validation when passing in the wrong type', function () {
 		data = {
 			name: 123,
@@ -245,7 +244,7 @@ describe('validator', function () {
 	});
 
 	describe('casting', function(){
-		it.only('should cast numbers properly', function(){
+		it('should cast numbers properly', function(){
 			schema = {
 				cast: true,
 				properties: {
@@ -292,9 +291,262 @@ describe('validator', function () {
 			});
 
 		});
+
+		it('should cast strings properly', function(){
+			schema = {
+				cast: true,
+				properties: {
+					name: {
+						type: 'string'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: 'name',
+					expected: 'name'
+				},
+				{
+					value: null,
+					expected: ''
+				},
+				{
+					value: 0,
+					expected: '0'
+				},
+				{
+					value: true,
+					expected: 'true'
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					name: testCase.value
+				});
+				assert(result.success);
+				assert.equal(result.data.name, testCase.expected);
+			});
+		});
+
+		it('should cast integers properly', function(){
+			schema = {
+				cast: true,
+				properties: {
+					count: {
+						type: 'integer'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: 12.3,
+					expected: 12
+				},
+				{
+					value: -12.3,
+					expected: -12
+				},
+				{
+					value: null,
+					expected: 0
+				},
+				{
+					value: 'hello',
+					error: true
+				},
+				{
+					value: '3',
+					expected: 3
+				},
+				{
+					value: true,
+					expected: 1
+				},
+				{
+					value: false,
+					expected: 0
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					count: testCase.value
+				});
+				if(testCase.error){
+					assert(!result.success);
+					assert.equal(result.errors.count.id, 'VALIDATION_ERROR_NOT_INTEGER');
+				}else{
+					assert(result.success);
+					assert.equal(result.data.count, testCase.expected);
+				}
+			});
+		});
+
+		it('should cast booleans properly', function(){
+
+			schema = {
+				cast: true,
+				properties: {
+					active: {
+						type: 'boolean'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: true,
+					expected: true
+				},
+				{
+					value: false,
+					expected: false
+				},
+				{
+					value: 3,
+					error: true
+				},
+				{
+					value: 'hello',
+					error: true
+				},
+				{
+					value: 1,
+					expected: true
+				},
+				{
+					value: 0,
+					expected: false
+				},
+				{
+					value: '1',
+					expected: true
+				},
+				{
+					value: '0',
+					expected: false
+				},
+				{
+					value: null,
+					expected: false
+				},
+				{
+					value: 'true',
+					expected: true
+				},
+				{
+					value: 'false',
+					expected: false
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					active: testCase.value
+				});
+				if(testCase.error){
+					assert(!result.success);
+					assert.equal(result.errors.active.id, 'VALIDATION_ERROR_NOT_BOOLEAN');
+				}else{
+					assert(result.success);
+					assert.equal(result.data.active, testCase.expected);
+				}
+			});
+		});
+
+		it('should cast objects properly', function(){
+			schema = {
+				cast: true,
+				properties: {
+					info: {
+						type: 'object'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: {},
+					expected: {}
+				},
+				{
+					value: 'hello',
+					error: true
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					info: testCase.value
+				});
+				if(testCase.error){
+					assert(!result.success);
+					assert.equal(result.errors.info.id, 'VALIDATION_ERROR_NOT_OBJECT');
+				}else{
+					assert(result.success);
+					assert.deepEqual(result.data.info, testCase.expected);
+				}
+			});
+		});
+		it('should cast arrays properly', function(){
+			schema = {
+				cast: true,
+				properties: {
+					skills: {
+						type: 'array'
+					}
+				}
+			};
+			var validator = new Validator(schema);
+
+			var testCases = [
+				{
+					value: ['running'],
+					expected:['running']
+				},
+				{
+					value: 'hello',
+					error: true
+				}
+			];
+			_.each(testCases, function(testCase){
+				var result = validator.validate({
+					skills: testCase.value
+				});
+				if(testCase.error){
+					assert(!result.success);
+					assert.equal(result.errors.skills.id, 'VALIDATION_ERROR_NOT_ARRAY');
+				}else{
+					assert(result.success);
+					assert.deepEqual(result.data.skills, testCase.expected);
+				}
+			});
+		});
 	});
 
 	describe('validation', function(){
+		it('should fail validation when required field is missing', function(){
+			schema = {
+				properties: {
+					email: {
+						type: 'string',
+						required: true
+					}
+				}
+			};
+			data = {
+			};
+			var validator = new Validator(schema);
+			var result = validator.validate(data);
+
+			assert.isFalse(result.success, 'it should fail success');
+			assert.isObject(result.errors, 'it should have errors');
+			assert.equal(result.errors.email.id, 'VALIDATION_ERROR_REQUIRED', 'email should fail to validate');
+		});
+
 		it('should compile validation rules when creating a schema', function(){
 			schema = {
 				properties: {
@@ -442,6 +694,48 @@ describe('validator', function () {
 			assert(!result.errors.percent, 'betweenNumber should validate percent');
 			assert.equal(result.errors.percentBad.id, 'VALIDATION_FAILED_BETWEEN_NUMBER', 'betweenNumber should fail to validate percentBad');
 			assert.equal(result.errors.percentBad.value, 'Value should be between 0 and 100', 'argument values should replace placeholders');
+		});
+
+		it.only('should allow for adding custom validations', function(){
+			schema = {
+				password: {
+					type: 'string',
+					validation: 'password'
+				},
+				badPassword: {
+					type: 'string',
+					validation: 'password'
+				},
+			};
+			var data = {
+				password: 'longpassword',
+				badPassword: 'short'
+			};
+			var validator = new Validator(schema, {
+				rules: {
+					validate: function(value, options, _from, _to){
+						var from = Number(_from),
+							to = Number(_to);
+						return value >= from && value <= to;
+					},
+					message: 'VALIDATION_FAILED_PASSWORD'
+				},
+				lexicon: {
+					'VALIDATION_FAILED_PASSWORD': 'custom error message'
+				}
+			});
+			var result = validator.validate(data);
+
+			assert.isFalse(result.success, 'it should fail success');
+			assert.isObject(result.errors, 'it should have errors');
+			assert(!result.errors.password, 'betweenNumber should validate percent');
+			assert.equal(result.errors.badPassword.id, 'VALIDATION_FAILED_PASSWORD', 'badPassword should fail to validate');
+			assert.equal(result.errors.badPassword.value, 'custom error message', 'badPassword error should have the passed in lexicon value');
+
+		});
+
+		it('should throw an error when rule is missing or has invalid validate', function(){
+			assert(false, 'it needs to implement custom rules first');
 		});
 	});
 
