@@ -270,7 +270,7 @@ describe('validator', function () {
 		var validator = new Validator(schema, {
 			types: {
 				specialString: {
-					cast: function (value) {
+					cast: function () {
 						return null;
 					},
 					validate: function (value) {
@@ -803,7 +803,7 @@ describe('validator', function () {
 			var validator = new Validator(schema, {
 				rules: {
 					password: {
-						validate: function (value, options) {
+						validate: function (value) {
 							return value.length > 8;
 						},
 						message: 'VALIDATION_FAILED_PASSWORD'
@@ -880,7 +880,7 @@ describe('validator', function () {
 			var validator = new Validator(schema, {
 				rules: {
 					password: {
-						validate: function (value, options) {
+						validate: function (value) {
 							return value.length > 8;
 						},
 						message: 'VALIDATION_FAILED_PASSWORD'
