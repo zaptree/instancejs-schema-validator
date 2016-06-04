@@ -3,6 +3,7 @@
 var gulp = require('gulp');
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
+var jshint = require('gulp-jshint');
 
 gulp.task('test', function (done) {
 
@@ -20,4 +21,13 @@ gulp.task('test', function (done) {
 
 });
 
-gulp.task('default', ['test']);
+gulp.task('lint', function(done){
+	// https://github.com/jshint/jshint/blob/master/examples/.jshintrc
+	gulp.src(['lib/**/*.js', 'tests/**/*.js', 'index.js'])
+		.pipe(jshint()) // Covering files
+		.pipe(jshint.reporter('jshint-stylish'))
+		.pipe(jshint.reporter('fail'))
+		.on('end', done);
+});
+
+gulp.task('default', ['lint', 'test']);

@@ -104,7 +104,7 @@ describe('validator', function () {
 				curve: 3,
 				nickname: 'snake'
 			}
-		}
+		};
 	});
 
 	it('should validate my data', function () {
@@ -246,7 +246,7 @@ describe('validator', function () {
 		};
 		var validator = new Validator(schema);
 		var run = function () {
-			validator.validate(data)
+			validator.validate(data);
 		};
 		assert.throws(run, 'Shema has no properties');
 	});
@@ -837,7 +837,7 @@ describe('validator', function () {
 			};
 			var validator = new Validator(schema);
 			var run = function () {
-				validator.validate(data)
+				validator.validate(data);
 			};
 			assert.throws(run, 'Rule password does not exist');
 		});
@@ -860,7 +860,7 @@ describe('validator', function () {
 				}
 			});
 			var run = function () {
-				validator.validate(data)
+				validator.validate(data);
 			};
 			assert.throws(run, 'Invalid rule.validate');
 		});
