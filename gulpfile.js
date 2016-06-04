@@ -5,8 +5,13 @@ var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
 var jshint = require('gulp-jshint');
 
+var folders = {
+	test: ['lib/**/*.js', 'index.js'],
+	lint: ['lib/**/*.js', 'tests/**/*.js', 'index.js']
+};
+
 gulp.task('test', ['lint'], function () {
-	return gulp.src(['lib/**/*.js', 'index.js'])
+	return gulp.src(folders.test)
 		.pipe(istanbul()) // Covering files
 		.pipe(istanbul.hookRequire()) // Force `require` to return covered files
 		.on('finish', function () {
@@ -19,9 +24,9 @@ gulp.task('test', ['lint'], function () {
 
 });
 
-gulp.task('lint', function(){
+gulp.task('lint', function () {
 	// https://github.com/jshint/jshint/blob/master/examples/.jshintrc
-	return gulp.src(['lib/**/*.js', 'tests/**/*.js', 'index.js'])
+	return gulp.src(folders.lint)
 		.pipe(jshint()) // Covering files
 		.pipe(jshint.reporter('jshint-stylish'))
 		.pipe(jshint.reporter('fail'));
