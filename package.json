@@ -1,6 +1,6 @@
 {
-  "name": "schema-validator",
-  "version": "0.1.0",
+  "name": "instancejs-schema-validator",
+  "version": "0.1.1",
   "description": "schema validation",
   "main": "index.js",
   "scripts": {
